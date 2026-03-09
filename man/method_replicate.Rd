@@ -2,15 +2,63 @@
 % Please edit documentation in R/method-replicate.R
 \name{method_replicate}
 \alias{method_replicate}
-\title{Declare a replication method}
+\title{Declare a resampling method for a registered implementation}
 \usage{
 method_replicate(method_name, args = NULL)
 }
 \arguments{
-\item{method_name}{A string naming the method, e.g. \code{"permute"}, \code{"boot"}.}
+\item{method_name}{A string naming the resampling method, e.g. \code{"permute"}
+or \code{"boot"}. Must match the \code{.method} argument passed to \code{\link[=resample]{resample()}}.}
 
-\item{args}{An \code{extra_args} object declaring method-specific arguments.}
+\item{args}{An \code{extra_args} object from \code{\link[=extra_args]{extra_args()}} declaring the
+method-specific arguments and their defaults. Defaults to \code{NULL} for
+methods with no extra arguments.}
+}
+\value{
+A \code{method_replicate} object.
 }
 \description{
-Declare a replication method
+\code{method_replicate()} declares a named resampling method and its accepted
+arguments for use in \code{\link[=reg_model_id]{reg_model_id()}}. It is part of the developer-facing
+extension API — end users do not call it directly.
+}
+\details{
+When a test registers an implementation with \code{method_replicate()}, that
+implementation becomes available via \code{\link[=resample]{resample()}} in the lazy pipeline.
+The \code{method_name} must match the \code{.method} argument passed to \code{\link[=resample]{resample()}}.
+}
+\section{Developer API}{
+
+\code{method_replicate()} is used inside \code{\link[=reg_model_id]{reg_model_id()}} to associate an impl
+function with a named resampling method. Multiple resampling methods can be
+registered for the same model type by passing multiple \code{\link[=reg_model_id]{reg_model_id()}}
+calls into \code{\link[=build_htest]{build_htest()}}.
+}
+
+\examples{
+# Permutation method with extra args
+method_replicate(
+    method_name = "permute",
+    args = extra_args(
+        n ~ 1000L,
+        seed ~ NULL
+    )
+)
+
+# Inside reg_model_id()
+reg_model_id(
+    ttest_impl_rel_permute,
+    "rel",
+    method = method_replicate(
+        method_name = "permute",
+        args = extra_args(
+            n ~ 1000L,
+            seed ~ NULL
+        )
+    )
+)
+
+}
+\seealso{
+\code{\link[=reg_model_id]{reg_model_id()}}, \code{\link[=extra_args]{extra_args()}}, \code{\link[=resample]{resample()}}, \code{\link[=build_htest]{build_htest()}}
 }

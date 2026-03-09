@@ -29,7 +29,7 @@ run_test.test_lazy = function(.x, ...) {
 #' @return A `stat_infer_out` object with slots `$result`, `$test_spec`,
 #'   `$model_id`, and `$data`.
 #'
-#' @seealso [run_test()], [find_impl()]
+#' @seealso [run_test()]
 #' @keywords internal
 #' @noRd
 execute_test = function(.x) {

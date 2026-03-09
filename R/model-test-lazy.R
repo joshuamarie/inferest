@@ -13,6 +13,27 @@ prepare_test.model_to_analyze = function(.x, .test, ...) {
     out
 }
 
+#' Update test arguments in a lazy pipeline
+#'
+#' Mutates the test arguments of a `test_lazy` object. This is a thin wrapper
+#' around [stats::update()] registered for the `test_lazy` class.
+#'
+#' @param object A `test_lazy` object from [prepare_test()].
+#' @param ... Named arguments to update in the test spec. Names must match
+#'   existing test arguments declared in the test function, e.g. `.paired`,
+#'   `.mu`, `.ci` for [TTEST()].
+#'
+#' @return The updated `test_lazy` object.
+#'
+#' @seealso [prepare_test()], [run_test()], [TTEST()], [CHI2_TEST()]
+#'
+#' @examples
+#' sleep |>
+#'     define_model(rel(group, extra)) |>
+#'     prepare_test(TTEST) |>
+#'     update(.paired = FALSE, .ci = 0.99) |>
+#'     run_test()
+#'
 #' @export
 update.test_lazy = function(object, ...) {
     object$test_spec$args = utils::modifyList(object$test_spec$args, list(...))

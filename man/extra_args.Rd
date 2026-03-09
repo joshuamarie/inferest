@@ -2,11 +2,41 @@
 % Please edit documentation in R/method-extra_args.R
 \name{extra_args}
 \alias{extra_args}
-\title{Supplied arguments declaration}
+\title{Declare extra arguments for a registered method}
 \usage{
 extra_args(...)
 }
-\description{
-Use one-sided formula \code{~n} for no default, two-sided \code{n ~ 1000L} for default.
+\arguments{
+\item{...}{One or more formulas declaring method arguments. Use \code{~n} for
+an argument with no default, or \code{n ~ 1000L} for an argument with a
+default value.}
 }
-\keyword{internal}
+\value{
+An \code{extra_args} object containing a list of argument declarations,
+each with a \code{name} and \code{default} slot.
+}
+\description{
+\code{extra_args()} declares the additional arguments accepted by any method
+registered via \code{\link[=reg_model_id]{reg_model_id()}}, such as \code{\link[=method_replicate]{method_replicate()}} or future
+method types. Each argument is declared as a formula: one-sided \code{~n} for
+no default, or two-sided \code{n ~ 1000L} for a default value.
+}
+\details{
+These declarations are used by the corresponding pipeline step —
+\code{\link[=resample]{resample()}} for resampling methods, and equivalents for other method types
+— to validate supplied arguments and fill in defaults for missing ones.
+}
+\examples{
+# No defaults
+extra_args(~n, ~seed)
+
+# With defaults
+extra_args(
+    n ~ 1000L,
+    seed ~ NULL
+)
+
+}
+\seealso{
+\code{\link[=method_replicate]{method_replicate()}}, \code{\link[=reg_model_id]{reg_model_id()}}, \code{\link[=resample]{resample()}}
+}
