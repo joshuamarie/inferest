@@ -42,6 +42,10 @@ prepare_test = function(.x, ...) {
     UseMethod("prepare_test")
 }
 
+#' @importFrom stats update
+#' @export
+stats::update
+
 #' Set a resampling strategy
 #'
 #' `resample()` defines the resampling method and number of repetitions.
@@ -59,15 +63,6 @@ prepare_test = function(.x, ...) {
 resample = function(.x, ...) {
     UseMethod("resample")
 }
-
-#' Update pipeline options
-#'
-#' Registers an S7 method on `stat_infer_pipeline` via `stats::update` for
-#' setting options like `.ci`, `.bayes`, `.alpha`.
-#'
-#' @importFrom stats update
-#' @export
-stats::update
 
 #' Register multiple tests
 #'
