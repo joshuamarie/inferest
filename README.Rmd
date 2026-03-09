@@ -1,0 +1,33 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    fig.path = "man/figures/README-",
+    out.width = "100%",
+    message = FALSE,
+    warning = FALSE
+)
+
+desc = read.dcf("DESCRIPTION")
+desc = setNames(as.list(desc), colnames(desc))
+```
+
+> This package is under construction
+
+# `r desc$Package` 
+
+Title: ***`r desc$Title`***
+
+This package attempts to re-imagine of what "grammar of statistical inference" should look like, by performing statistical inference in general, including: 
+
+1.  Simulation
+2.  Bayesian inference
+3.  Hypothesis testing
+
+with `{tidyverse}` (`{ggplot2}` to be precise) paradigm. 
