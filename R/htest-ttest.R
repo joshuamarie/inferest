@@ -1,3 +1,92 @@
+#' T-Test
+#'
+#' `TTEST()` performs a t-test for one-sample, two-sample, paired, pairwise,
+#' or formula-based comparisons. It dispatches on the `model_id` type declared
+#' in [define_model()], automatically selecting the appropriate variant.
+#'
+#' @section Supported model IDs:
+#' - `compare_by()`: targeted for two-sample or paired t-test, comparing `x` across (2)
+#'   groups
+#' - `one_sample()`: one-sample t-test against a reference value `.mu`
+#' - `pairwise()`: all pairwise t-tests across selected variables
+#' - `formula`: passed directly to [stats::t.test()]
+#'
+#' @section Resampling:
+#' `TTEST()` supports permutation and bootstrap resampling via [resample()]
+#' for `rel()` models. Use `.method = "permute"` for permutation testing or
+#' `.method = "boot"` for bootstrap confidence intervals.
+#'
+#' ``` r
+#' sleep |>
+#'     define_model(rel(group, extra)) |>
+#'     prepare_test(TTEST) |>
+#'     resample(.method = "permute", n = 5000) |>
+#'     run_test()
+#' ```
+#'
+#' @param .model A model ID object from [rel()], [one_sample()], [pairwise()],
+#'   or a formula. When supplied, the test executes immediately. When `NULL`
+#'   (default), returns a `test_spec` for use in the lazy pipeline via
+#'   [prepare_test()].
+#' @param .data A data frame. Only used when `.model` is supplied directly
+#'   (standalone path). Ignored in the pipeline path.
+#' @param .name A string used as the test title in output. Defaults to
+#'   `"T-Test"`.
+#' @param .paired Logical. Whether to perform a paired t-test. Defaults to
+#'   `TRUE`.
+#' @param .mu Numeric. The reference value under the null hypothesis. Defaults
+#'   to `0`.
+#' @param .alt A string specifying the alternative hypothesis. One of
+#'   `"two.sided"` (default), `"greater"`, or `"less"`.
+#' @param .ci Numeric. The confidence level for the confidence interval.
+#'   Defaults to `0.95`.
+#' @param ... Additional arguments passed to methods.
+#'
+#' @return An `htest_infer` object (standalone), or a `test_spec` object
+#'   (pipeline). The specific subclass depends on the model ID:
+#'   - `ttest_two` for `rel()`
+#'   - `ttest_one` for `one_sample()`
+#'   - `ttest_pairwise` for `pairwise()`
+#'   - `ttest_formula` for formula
+#'   - `ttest_permute` for permutation resampling
+#'   - `ttest_boot` for bootstrap resampling
+#'
+#' @seealso [define_model()], [prepare_test()], [run_test()], [resample()],
+#'   [stats::t.test()]
+#'
+#' @examples
+#' # Pipeline path (lazy)
+#' sleep |>
+#'     define_model(rel(group, extra)) |>
+#'     prepare_test(TTEST) |>
+#'     update(.paired = FALSE) |>
+#'     run_test()
+#'
+#' # Eager path (immediate)
+#' sleep |>
+#'     define_model(rel(group, extra)) |>
+#'     run_test(TTEST)
+#'
+#' # Standalone path
+#' TTEST(rel(group, extra), sleep)
+#'
+#' # One-sample
+#' sleep |>
+#'     define_model(one_sample(extra)) |>
+#'     run_test(TTEST)
+#'
+#' # Pairwise
+#' sleep |>
+#'     define_model(pairwise(extra, group)) |>
+#'     run_test(TTEST)
+#'
+#' # Permutation resampling
+#' sleep |>
+#'     define_model(rel(group, extra)) |>
+#'     prepare_test(TTEST) |>
+#'     resample(.method = "permute", n = 5000) |>
+#'     run_test()
+#'
 #' @export
 TTEST = function(
         .model = NULL,
