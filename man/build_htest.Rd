@@ -2,30 +2,69 @@
 % Please edit documentation in R/htest-spec.R
 \name{build_htest}
 \alias{build_htest}
-\title{Core builder called by every test function}
+\title{Core builder for hypothesis test functions}
 \usage{
 build_htest(cls, args, impl, model_id, .name, .env = rlang::caller_env())
 }
 \arguments{
-\item{cls}{A string naming the test class, e.g. \code{"ttest"} or \code{"chi2test"}.}
+\item{cls}{A string naming the test class, e.g. \code{"ttest"} or \code{"chi2test"}.
+Appended to the class vector of the result.}
 
-\item{args}{A named list of test arguments (e.g. \code{.paired}, \code{.mu}, \code{.ci}).}
+\item{args}{A named list of test arguments, e.g.
+\code{list(.paired = TRUE, .mu = 0, .ci = 0.95)}. Passed into the impl
+function as \code{args}.}
 
-\item{impl}{A list of \code{registered_impl} objects from \code{\link[=reg_model_id]{reg_model_id()}}.}
+\item{impl}{A list of \code{registered_impl} objects from \code{\link[=reg_model_id]{reg_model_id()}}.
+Declares which model types the test supports, and under which methods.}
 
-\item{model_id}{A model ID object from \code{\link[=rel]{rel()}}, \code{\link[=cont_tab]{cont_tab()}}, etc., or \code{NULL}.}
+\item{model_id}{A model ID object from \code{\link[=rel]{rel()}}, \code{\link[=cont_tab]{cont_tab()}}, etc., or
+\code{NULL}. When non-\code{NULL}, triggers immediate execution.}
 
-\item{.env}{The caller environment, used for error reporting.}
+\item{.name}{A string displayed as the test title in output, e.g.
+\code{"T-Test"} or \code{"Chi-Square Test"}.}
+
+\item{.env}{The caller environment. Used internally for error reporting.
+Defaults to \code{\link[rlang:stack]{rlang::caller_env()}}.}
 }
 \value{
-An \code{htest_infer} (standalone) or \code{test_spec} (pipeline) object.
+An \code{htest_infer} object (eager) or a \code{test_spec} object (deferred).
 }
 \description{
-Called inside every user-facing test function such as \code{\link[=TTEST]{TTEST()}} or
-\code{\link[=CHI2_TEST]{CHI2_TEST()}}. When \code{model_id} is supplied, executes immediately and
-returns an \code{htest_infer}. When \code{model_id} is \code{NULL}, defers execution
-and returns a \code{test_spec} for \code{\link[=run_test]{run_test()}} to execute later.
+\code{build_htest()} is called inside every user-facing test function such as
+\code{\link[=TTEST]{TTEST()}} or \code{\link[=CHI2_TEST]{CHI2_TEST()}}. It handles two execution modes:
+}
+\details{
+\itemize{
+\item \strong{Eager} — when \code{model_id} is supplied, the test executes immediately
+and returns an \code{htest_infer} object.
+\item \strong{Deferred} — when \code{model_id} is \code{NULL}, execution is deferred and a
+\code{test_spec} object is returned for \code{\link[=run_test]{run_test()}} to execute later.
+}
+}
+\section{Developer API}{
+
+\code{build_htest()} is part of the developer-facing extension API. It is the
+single entry point for defining new test functions. A minimal test function
+calls \code{build_htest()} with a \code{cls}, \code{args}, \code{impl}, \code{model_id}, and
+\code{.name}.
+}
+
+\examples{
+NEW_TEST = function(.model = NULL, .data = NULL, .name = "Test something new", ...) {
+    args = list(.data = .data)
+
+    build_htest(
+        cls = "newtest",
+        args = args,
+        impl = list(
+            reg_model_id(my_impl_fn, "rel")
+        ),
+        model_id = .model,
+        .name = .name
+    )
+}
+
 }
 \seealso{
-\code{\link[=reg_model_id]{reg_model_id()}}, \code{\link[=find_impl]{find_impl()}}, \code{\link[=run_test]{run_test()}}
+\code{\link[=reg_model_id]{reg_model_id()}}, \code{\link[=new_htest]{new_htest()}}, \code{\link[=run_test]{run_test()}}, \code{\link[=prepare_test]{prepare_test()}}
 }

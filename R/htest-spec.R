@@ -10,9 +10,9 @@
 #'
 #' @return A `registered_impl` object.
 #'
-#' @seealso [build_htest()], [find_impl()]
+#' @seealso [build_htest()]
 #' @keywords internal
-#' @noRd
+#' @export
 reg_model_id = function(impl, model_id_class, method = NULL) {
     out = list(
         impl = impl,
@@ -34,7 +34,7 @@ reg_model_id = function(impl, model_id_class, method = NULL) {
 #'
 #' @return A function with signature `function(model_obj, args)`.
 #'
-#' @seealso [reg_model_id()], [execute_test()]
+#' @seealso [build_htest()]
 #' @keywords internal
 #' @noRd
 find_impl = function(model_id, impl_list, method = NULL) {
@@ -94,22 +94,55 @@ new_htest = function(res, impl_cls) {
     out
 }
 
-#' Core builder called by every test function
+#' Core builder for hypothesis test functions
 #'
-#' Called inside every user-facing test function such as [TTEST()] or
-#' [CHI2_TEST()]. When `model_id` is supplied, executes immediately and
-#' returns an `htest_infer`. When `model_id` is `NULL`, defers execution
-#' and returns a `test_spec` for [run_test()] to execute later.
+#' `build_htest()` is called inside every user-facing test function such as
+#' [TTEST()] or [CHI2_TEST()]. It handles two execution modes:
+#'
+#' - **Eager** — when `model_id` is supplied, the test executes immediately
+#'   and returns an `htest_infer` object.
+#' - **Deferred** — when `model_id` is `NULL`, execution is deferred and a
+#'   `test_spec` object is returned for [run_test()] to execute later.
+#'
+#' @section Developer API:
+#' `build_htest()` is part of the developer-facing extension API. It is the
+#' single entry point for defining new test functions. A minimal test function
+#' calls `build_htest()` with a `cls`, `args`, `impl`, `model_id`, and
+#' `.name`.
 #'
 #' @param cls A string naming the test class, e.g. `"ttest"` or `"chi2test"`.
-#' @param args A named list of test arguments (e.g. `.paired`, `.mu`, `.ci`).
+#'   Appended to the class vector of the result.
+#' @param args A named list of test arguments, e.g.
+#'   `list(.paired = TRUE, .mu = 0, .ci = 0.95)`. Passed into the impl
+#'   function as `args`.
 #' @param impl A list of `registered_impl` objects from [reg_model_id()].
-#' @param model_id A model ID object from [rel()], [cont_tab()], etc., or `NULL`.
-#' @param .env The caller environment, used for error reporting.
+#'   Declares which model types the test supports, and under which methods.
+#' @param model_id A model ID object from [rel()], [cont_tab()], etc., or
+#'   `NULL`. When non-`NULL`, triggers immediate execution.
+#' @param .name A string displayed as the test title in output, e.g.
+#'   `"T-Test"` or `"Chi-Square Test"`.
+#' @param .env The caller environment. Used internally for error reporting.
+#'   Defaults to [rlang::caller_env()].
 #'
-#' @return An `htest_infer` (standalone) or `test_spec` (pipeline) object.
+#' @return An `htest_infer` object (eager) or a `test_spec` object (deferred).
 #'
-#' @seealso [reg_model_id()], [find_impl()], [run_test()]
+#' @seealso [reg_model_id()], [new_htest()], [run_test()], [prepare_test()]
+#'
+#' @examples
+#' NEW_TEST = function(.model = NULL, .data = NULL, .name = "Test something new", ...) {
+#'     args = list(.data = .data)
+#'
+#'     build_htest(
+#'         cls = "newtest",
+#'         args = args,
+#'         impl = list(
+#'             reg_model_id(my_impl_fn, "rel")
+#'         ),
+#'         model_id = .model,
+#'         .name = .name
+#'     )
+#' }
+#'
 #' @export
 build_htest = function(cls, args, impl, model_id, .name, .env = rlang::caller_env()) {
     if (!is.null(model_id)) {
