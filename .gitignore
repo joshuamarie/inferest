@@ -2,3 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+
+.Renviron
+.Rprofile
+
+*.Rproj
+docs
+docs/
+inst/doc

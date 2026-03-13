@@ -3,7 +3,7 @@
 
 > This package is under construction
 
-# inferlystat
+# inferest
 
 Title: ***Higer Level Interface for Statistical Inference***
 
